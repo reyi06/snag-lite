@@ -55,5 +55,6 @@ Material changes to this policy will be published in the repository and with the
 
 ## Contact
 
-For privacy questions, open an issue at <https://github.com/reyi06/snag/issues>.
+For privacy questions, open an issue at <https://github.com/reyi06/snag-lite/issues>.
+
 

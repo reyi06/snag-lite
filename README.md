@@ -1,6 +1,6 @@
 # Snag Lite
 
-Snag Lite is a lightweight, side-by-side fork of Snag. It resolves public social links on-device and saves the media to `Downloads/Snag` without ads, an account, a backend, or an API key.
+Snag Lite is a lightweight, side-by-side fork of [Snag](https://github.com/reyi06/snag). It resolves public social links on-device and saves the media to `Downloads/Snag` without ads, an account, a backend, or an API key.
 
 Current Lite build: **0.9.0**
 

@@ -26,4 +26,5 @@ To the maximum extent permitted by law, the author is not liable for any loss, c
 
 ## Contact
 
-For legal or takedown questions, open an issue at <https://github.com/reyi06/snag/issues>.
+For legal or takedown questions, open an issue at <https://github.com/reyi06/snag-lite/issues>.
+
