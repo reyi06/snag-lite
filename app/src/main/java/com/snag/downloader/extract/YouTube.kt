@@ -1,6 +1,7 @@
 package com.snag.downloader.extract
 
 import android.content.Context
+import com.snag.downloader.R
 import com.snag.downloader.core.Author
 import com.snag.downloader.core.Codec
 import com.snag.downloader.core.ExtractionException
@@ -16,7 +17,6 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.mapper.VideoFormat
 import com.yausername.youtubedl_android.mapper.VideoInfo
-import com.yausername.ffmpeg.FFmpeg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -28,6 +28,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
@@ -47,14 +48,36 @@ internal object YouTubeClient {
             initMutex.withLock {
                 if (initialized) return@withLock
                 try {
+                    installBundledYtDlp(context)
                     YoutubeDL.getInstance().init(context.applicationContext)
-                    FFmpeg.getInstance().init(context.applicationContext)
                     refreshYtDlp(context)
                     initialized = true
                 } catch (t: Throwable) {
                     throw ExtractionException.Failed("yt-dlp", t)
                 }
             }
+        }
+    }
+
+    /**
+     * Replace the runtime copy on each app update with the binary shipped in
+     * the APK. This avoids a first-run dependency on GitHub being reachable.
+     */
+    private fun installBundledYtDlp(context: Context) {
+        val version = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+        }.getOrDefault(0L)
+        val prefs = context.getSharedPreferences("snag_ytdlp", Context.MODE_PRIVATE)
+        if (prefs.getLong("bundled_version", -1L) == version) return
+
+        runCatching {
+            val dir = File(context.noBackupFilesDir, "${YoutubeDL.baseName}/yt-dlp")
+            dir.mkdirs()
+            val target = File(dir, YoutubeDL.ytdlpBin)
+            context.resources.openRawResource(R.raw.ytdlp).use { input ->
+                target.outputStream().use { output -> input.copyTo(output) }
+            }
+            prefs.edit().putLong("bundled_version", version).apply()
         }
     }
 

@@ -9,11 +9,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.snag.downloader"
+        applicationId = "com.snag.downloader.lite"
         minSdk = 29
         targetSdk = 36
-        versionCode = 15
-        versionName = "0.8.3"
+        versionCode = 1
+        versionName = "0.9.0"
     }
 
     splits {
@@ -27,9 +27,14 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+    }
+
+    androidResources {
+        localeFilters += listOf("en")
     }
 
     compileOptions {
@@ -70,7 +75,6 @@ dependencies {
 
     // yt-dlp wrapper used by Seal. Snag is GPL-3.0 to comply with this dependency.
     implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
-    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

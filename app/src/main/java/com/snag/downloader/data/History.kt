@@ -353,8 +353,9 @@ class MediaRepository(
         return when {
             "429" in detail || "rate limit" in detail ->
                 "Instagram is rate-limiting this request. Wait a minute, then try again."
-            "login" in detail || "401" in detail || "403" in detail ->
-                "Instagram wants a login for this post. It may be private or age-restricted."
+            "empty media response" in detail || "login" in detail ||
+                "401" in detail || "403" in detail ->
+                "Instagram wants a login for this post. Snag Lite does not support sign-in."
             "404" in detail || "unavailable" in detail ->
                 "This Instagram post is unavailable or was removed."
             else ->

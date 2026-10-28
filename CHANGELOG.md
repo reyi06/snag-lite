@@ -16,6 +16,27 @@ Snag follows [Semantic Versioning](https://semver.org/) and [Keep a Changelog](h
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-28
+
+### Added
+
+- **Snag Lite** — a side-by-side fork under the separate package `com.snag.downloader.lite`.
+- A minimal static FFmpeg 7.1 build for on-device video/audio merging, with H.264, HEVC, VP9, AV1, AAC, and Opus support.
+- R8 full-mode shrinking and resource shrinking for release builds.
+
+### Changed
+
+- The arm64 APK is about **23 MB**, down from about **100 MB** in 0.8.3.
+- The FFmpeg Android package was removed. yt-dlp still provides the Python runtime and extractor updates.
+- yt-dlp is stored once as a raw resource instead of being duplicated in assets.
+- The Lite app header and launcher label read **Snag Lite**.
+
+### Removed
+
+- TikTok account sign-in, the TikTok login WebView, session validation, and the account section in Settings.
+- Instagram login/cookie support. Posts that require a login now fail with a clear message instead of suggesting cookie configuration.
+- The sign-in-only profile verification flow. Public profile links still resolve through the no-login path.
+
 ## [0.8.3] - 2026-10-28
 
 ### Added

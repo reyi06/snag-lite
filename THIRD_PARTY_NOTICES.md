@@ -1,13 +1,31 @@
 # Third-Party Notices
 
-Snag is licensed under GPL-3.0 because it includes `youtubedl-android`, which is
-GPL-3.0. The full source for Snag is published under the same license.
+Snag Lite is licensed under GPL-3.0 because it includes `youtubedl-android`,
+which is GPL-3.0. The full source for Snag Lite is published under the same
+license.
 
 ## youtubedl-android
 
 - Project: https://github.com/yausername/youtubedl-android
 - License: GNU General Public License v3.0
-- Bundles yt-dlp (Unlicense) and FFmpeg components; their upstream notices apply.
+- Bundles the Python runtime, QuickJS, and the yt-dlp zipapp (Unlicense).
+- The Android FFmpeg AAR is not used by Snag Lite.
+
+## FFmpeg
+
+- Project: https://ffmpeg.org/
+- Version: 7.1 (n7.1)
+- License: GNU Lesser General Public License 2.1 or later. The full text is in
+  `app/src/main/assets/licenses/FFmpeg-LGPL-2.1.txt`.
+- Snag Lite ships a minimal static `ffmpeg` executable, renamed to
+  `libffmpeg.so`, for stream copy and MP4 remuxing.
+- The build disables networking, encoders, devices, and most filters. It enables
+  the mov/matroska/webm demuxers and muxers, AAC/H.264/HEVC/VP9/AV1/Opus/Vorbis
+  parsers, the AAC/Opus/Vorbis/H.264/HEVC/VP9/AV1 decoders needed for stream
+  metadata, and the AAC/AV1/VP9 bitstream filters.
+- Source code is available from the FFmpeg project. Snag Lite does not modify
+  FFmpeg's source. The exact build is recorded in
+  `tools/build-ffmpeg-android.sh` and can be reproduced with the Android NDK.
 
 ## tt-dlp
 

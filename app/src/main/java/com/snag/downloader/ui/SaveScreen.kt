@@ -74,7 +74,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -100,7 +99,6 @@ import com.snag.downloader.core.SourcePlatform
 import com.snag.downloader.core.StrategyFailure
 import com.snag.downloader.core.bestVariant
 import com.snag.downloader.data.QualityPreference
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 @Composable
@@ -111,17 +109,6 @@ fun SaveScreen(vm: SnagViewModel) {
     val profile = (vm.state as? ResolveState.Profile)?.profile
     var profileOpen by rememberSaveable(profile?.url) { mutableStateOf(false) }
     var handledProfileRequest by rememberSaveable { mutableIntStateOf(0) }
-    val scope = rememberCoroutineScope()
-    val startSignIn = rememberTikTokSignIn {
-        vm.markTikTokSignedIn()
-        vm.resolve()
-    }
-    val startVerify = rememberTikTokProfileVerify(
-        onItems = { raw ->
-            vm.applyProfileItems(raw)
-        },
-        onVerified = vm::reloadVerifiedProfile,
-    )
 
     LaunchedEffect(Unit) { vm.refreshHistory() }
 
@@ -151,7 +138,7 @@ fun SaveScreen(vm: SnagViewModel) {
         ) {
             item {
                 ScreenHeader(
-                    title = "Snag",
+                    title = "Snag Lite",
                     leading = { RoyalMark(Modifier.size(22.dp)) },
                 )
             }
@@ -210,18 +197,9 @@ fun SaveScreen(vm: SnagViewModel) {
 
                         is ResolveState.Profile -> ProfileCard(
                             profile = state.profile,
-                            signedIn = vm.tiktokSignedIn,
                             bookmarked = vm.isBookmarked(state.profile),
                             onBookmark = { vm.toggleBookmark(state.profile) },
                             onClick = { profileOpen = true },
-                            onSignIn = startSignIn,
-                            onVerify = {
-                                scope.launch {
-                                    if (vm.validateTikTokSession()) {
-                                        startVerify(state.profile.url)
-                                    }
-                                }
-                            },
                             onOpenExternal = { vm.openProfile(state.profile) },
                         )
                     }
@@ -729,12 +707,9 @@ private fun QualityDialog(
 @Composable
 private fun ProfileCard(
     profile: ProfileBundle,
-    signedIn: Boolean,
     bookmarked: Boolean,
     onBookmark: () -> Unit,
     onClick: () -> Unit,
-    onSignIn: () -> Unit,
-    onVerify: () -> Unit,
     onOpenExternal: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -806,12 +781,6 @@ private fun ProfileCard(
 
         if (!enabled) {
             Spacer(Modifier.height(12.dp))
-            SnagPrimaryButton(
-                text = if (signedIn) "Verify on TikTok" else "Sign in to TikTok",
-                onClick = if (signedIn) onVerify else onSignIn,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(8.dp))
             SnagSecondaryButton(
                 text = "Open on TikTok",
                 onClick = onOpenExternal,

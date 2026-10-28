@@ -60,6 +60,16 @@ internal class InstagramYtDlpStrategy(private val context: Context) : Strategy {
         val response = try {
             YoutubeDL.getInstance().execute(request, "instagram")
         } catch (t: Throwable) {
+            val detail = t.message.orEmpty()
+            if (
+                "empty media response" in detail.lowercase() ||
+                "login" in detail.lowercase()
+            ) {
+                throw ExtractionException.Blocked(
+                    id,
+                    "This post needs an Instagram login. Snag Lite does not support sign-in.",
+                )
+            }
             throw ExtractionException.Failed(id, t)
         }
 
@@ -239,9 +249,17 @@ internal class InstagramYtDlpStrategy(private val context: Context) : Strategy {
             ?: raw.trim().take(180)
         val lower = detail.lowercase()
         return when {
-            "login" in lower || "rate-limit" in lower || "rate limit" in lower ||
+            "empty media response" in lower || "login" in lower ->
+                ExtractionException.Blocked(
+                    id,
+                    "This post needs an Instagram login. Snag Lite does not support sign-in.",
+                )
+            "rate-limit" in lower || "rate limit" in lower ||
                 "not available to everyone" in lower || "private" in lower ->
-                ExtractionException.Blocked(id, detail)
+                ExtractionException.Blocked(
+                    id,
+                    "Instagram did not return this post publicly. It may be private, removed, or rate-limited.",
+                )
             "no video formats" in lower || "no media" in lower ->
                 ExtractionException.NoMedia(id, detail)
             else -> ExtractionException.Failed(id, IOException(detail))

@@ -27,7 +27,6 @@ import com.snag.downloader.data.HistoryEntry
 import com.snag.downloader.data.Outcome
 import com.snag.downloader.data.ProfileBookmark
 import com.snag.downloader.data.QualityPreference
-import com.snag.downloader.data.TikTokSession
 import com.snag.downloader.download.DOWNLOAD_BYTES
 import com.snag.downloader.download.DOWNLOAD_INDEX
 import com.snag.downloader.download.DOWNLOAD_INDETERMINATE
@@ -112,9 +111,6 @@ class SnagViewModel(application: Application) : AndroidViewModel(application) {
     var scrollOverlayOpacity by mutableStateOf(prefs.scrollOverlayOpacity)
         private set
 
-    var tiktokSignedIn by mutableStateOf(TikTokSession.hasSessionCookie())
-        private set
-
     /** Transient user-facing note; the root shows it once and clears it. */
     var message by mutableStateOf<String?>(null)
         private set
@@ -144,9 +140,6 @@ class SnagViewModel(application: Application) : AndroidViewModel(application) {
         refreshProfileBookmarks()
         queueWork.observeForever(queueObserver)
         prefs.observeScrollMode { enabled -> scrollModeEnabled = enabled }
-        if (tiktokSignedIn) {
-            viewModelScope.launch { validateTikTokSession() }
-        }
     }
 
     override fun onCleared() {
@@ -641,41 +634,6 @@ class SnagViewModel(application: Application) : AndroidViewModel(application) {
         scrollModeEnabled = prefs.scrollModeEnabled
         lowProfileCrown = prefs.lowProfileCrown
         scrollOverlayOpacity = prefs.scrollOverlayOpacity
-    }
-
-    /**
-     * The cookie store can contain a guest or expired TikTok session. Only the account
-     * endpoint is treated as proof of login; this is also how an expired cookie is caught.
-     */
-    suspend fun validateTikTokSession(): Boolean {
-        return when (TikTokSession.validate()) {
-            TikTokSession.Status.Valid -> {
-                tiktokSignedIn = true
-                true
-            }
-
-            TikTokSession.Status.Expired -> {
-                tiktokSignedIn = false
-                message = "TikTok session expired. Sign in again."
-                false
-            }
-
-            TikTokSession.Status.Unknown -> {
-                message = "Couldn't verify TikTok session"
-                tiktokSignedIn
-            }
-        }
-    }
-
-    fun markTikTokSignedIn() {
-        tiktokSignedIn = true
-        message = "Signed in to TikTok"
-    }
-
-    fun signOutTikTok() {
-        TikTokSession.signOut()
-        tiktokSignedIn = false
-        message = "Signed out of TikTok"
     }
 
     private companion object {

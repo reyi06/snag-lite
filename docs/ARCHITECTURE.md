@@ -1,8 +1,8 @@
-# Snag architecture
+# Snag Lite architecture
 
-Snag is a single-module Android app built with Kotlin and Jetpack Compose. All extraction and downloads happen on the device; there is no Snag backend, account system, analytics, or billing.
+Snag Lite is a single-module Android app built with Kotlin and Jetpack Compose. All extraction and downloads happen on the device; there is no Snag backend, account system, analytics, or billing. The Lite package is `com.snag.downloader.lite`, so it installs beside the original Snag.
 
-Current release: **0.8.3** (`versionCode` 15).
+Current Lite build: **0.9.0** (`versionCode` 1).
 
 ## Layers
 
@@ -37,11 +37,11 @@ Public profiles use the no-login path:
 4. Page `/api/creator/item_list/` using the anonymous `ttwid` cookie from the embed.
 5. Filter out reposts, other authors, and posts without playable media.
 
-The WebView verification path and the optional TikWM fallback remain last-resort fallbacks.
+The optional TikWM fallback remains a last-resort fallback. Lite has no account sign-in or authenticated profile-verification activity.
 
 ## YouTube
 
-YouTube uses the embedded `youtubedl-android` runtime, which bundles yt-dlp, Python, and FFmpeg. `YouTubeExtractor` resolves a single video and exposes progressive and adaptive video variants plus the best audio-only format. Adaptive variants carry a yt-dlp selector such as `401+140`; the download worker hands that pair to yt-dlp and lets its bundled FFmpeg merge the result, so 1080p, 1440p, and 2160p sources are available instead of only progressive 360p/720p streams. `YouTubePlaylistExtractor` reads the playlist page for video IDs, resolves the first 10 entries through yt-dlp with up to three concurrent lookups, and returns a `ProfileBundle` so playlists use the same batch sheet, queue, history, and progress notification as other platforms. Resolved video metadata is cached in memory for 10 minutes. The runtime is initialized lazily on the first YouTube request.
+YouTube uses the embedded `youtubedl-android` runtime, which bundles yt-dlp, Python, and QuickJS. FFmpeg is no longer provided by that AAR: Lite ships a minimal static FFmpeg 7.1 executable at `app/src/main/jniLibs/<abi>/libffmpeg.so`. `YouTubeExtractor` resolves a single video and exposes progressive and adaptive video variants plus the best audio-only format. Adaptive variants carry a yt-dlp selector such as `401+140`; the download worker hands that pair to yt-dlp and points it at the static FFmpeg binary, so 1080p, 1440p, and 2160p sources are available instead of only progressive 360p/720p streams. `YouTubePlaylistExtractor` reads the playlist page for video IDs, resolves the first 10 entries through yt-dlp with up to three concurrent lookups, and returns a `ProfileBundle` so playlists use the same batch sheet, queue, history, and progress notification as other platforms. Resolved video metadata is cached in memory for 10 minutes. The runtime is initialized lazily on the first YouTube request.
 
 Long playlist resolution reports progress to `SnagViewModel` and can be cancelled; a cancelled load restores the previous result instead of showing a failure.
 
@@ -54,7 +54,7 @@ Instagram's captioned embed used to expose `display_url` and `video_url` directl
 - image-only entries use the best thumbnail URL as the photo;
 - the old embed and OpenGraph strategies remain fallbacks.
 
-yt-dlp is refreshed from the stable GitHub release at most once per day. The refresh is best-effort: failures keep the bundled binary, and the timestamp prevents a retry loop.
+Lite does not offer an Instagram login or cookie export. If Instagram returns a login wall, an empty media response, or an audience restriction, extraction fails with a message explaining that the post needs a login. yt-dlp is refreshed from the stable GitHub release at most once per day. The refresh is best-effort: failures keep the bundled binary, and the timestamp prevents a retry loop.
 
 `TikTokIdentityCache` stores the stable `secUid` plus public profile metadata per handle
 for 30 days. A cache hit lets the extractor call `/api/creator/item_list/` immediately,
@@ -82,7 +82,7 @@ There is no AccessibilityService, automatic scrolling, share-sheet automation, o
 
 `DownloadWorker` streams files sequentially into `MediaStore.Downloads/Snag`, retries transient failures, tries an alternate CDN URL, and updates history and the progress notification. Photo carousels are saved as individual images.
 
-Direct downloads publish the current batch index, overall percentage, transferred bytes, total bytes when the server reports `Content-Length`, and a smoothed transfer speed. Adaptive YouTube and Instagram downloads use `DownloadJob.ytDlpFormat`: yt-dlp pulls the chosen video and audio streams into the app cache, FFmpeg merges them, and the worker imports the merged file into MediaStore. Those jobs publish `Downloading video + audio` and `Merging video + audio` stages instead of a byte/speed readout. `SnagViewModel` observes the unique WorkManager queue and renders the in-app download bar above the navigation bar on every tab. When the queue empties, history is refreshed once so completed rows appear without waiting for a screen change.
+Direct downloads publish the current batch index, overall percentage, transferred bytes, total bytes when the server reports `Content-Length`, and a smoothed transfer speed. Adaptive YouTube and Instagram downloads use `DownloadJob.ytDlpFormat`: yt-dlp pulls the chosen video and audio streams into the app cache, the static FFmpeg binary merges them, and the worker imports the merged file into MediaStore. Those jobs publish `Downloading video + audio` and `Merging video + audio` stages instead of a byte/speed readout. `SnagViewModel` observes the unique WorkManager queue and renders the in-app download bar above the navigation bar on every tab. When the queue empties, history is refreshed once so completed rows appear without waiting for a screen change.
 
 ## Local data
 

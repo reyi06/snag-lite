@@ -65,8 +65,6 @@ import kotlin.math.roundToInt
 fun SettingsScreen(vm: SnagViewModel) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var confirmClear by remember { mutableStateOf(false) }
-    var confirmSignOut by remember { mutableStateOf(false) }
-    val startSignIn = rememberTikTokSignIn { vm.markTikTokSignedIn() }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -211,41 +209,6 @@ fun SettingsScreen(vm: SnagViewModel) {
             )
 
             Text(
-                "Account",
-                modifier = Modifier.padding(start = 4.dp, top = 8.dp),
-                style = MaterialTheme.typography.titleMedium,
-            )
-
-            SnagCard(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(0.dp),
-            ) {
-                val colors = snagColors()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text("TikTok", style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            if (vm.tiktokSignedIn) "Signed in" else "Not signed in",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (vm.tiktokSignedIn) colors.accent
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    SnagTextButton(
-                        text = if (vm.tiktokSignedIn) "Sign out" else "Sign in",
-                        onClick = {
-                            if (vm.tiktokSignedIn) confirmSignOut = true else startSignIn()
-                        },
-                    )
-                }
-            }
-
-            Text(
                 "History",
                 modifier = Modifier.padding(start = 4.dp, top = 8.dp),
                 style = MaterialTheme.typography.titleMedium,
@@ -319,34 +282,6 @@ fun SettingsScreen(vm: SnagViewModel) {
         )
     }
 
-    if (confirmSignOut) {
-        AlertDialog(
-            onDismissRequest = { confirmSignOut = false },
-            title = { Text("Sign out of TikTok?") },
-            text = { Text("This clears the TikTok web session from this app. Saved files stay on your phone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        vm.signOutTikTok()
-                        
-                        confirmSignOut = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                ) {
-                    Text("Sign out")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmSignOut = false }) { Text("Cancel") }
-            },
-            shape = RoundedCornerShape(12.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }
 
 @Composable

@@ -18,7 +18,7 @@
         android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:label="Snag"
+        android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Snag">
 
@@ -63,12 +63,6 @@
                 <data android:scheme="https" android:host="fb.watch" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".TikTokLoginActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.Snag" />
 
         <activity
             android:name=".scroll.ClipboardRelayActivity"
