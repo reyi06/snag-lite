@@ -23,8 +23,8 @@ license.
   the mov/matroska/webm demuxers and muxers, AAC/H.264/HEVC/VP9/AV1/Opus/Vorbis
   parsers, the AAC/Opus/Vorbis/H.264/HEVC/VP9/AV1 decoders needed for stream
   metadata, and the AAC/AV1/VP9 bitstream filters.
-- Source code is available from the FFmpeg project. Snag Lite does not modify
-  FFmpeg's source. The exact build is recorded in
+- Source: https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz. Snag Lite does not
+  modify FFmpeg's source. The exact build is recorded in
   `tools/build-ffmpeg-android.sh` and can be reproduced with the Android NDK.
 
 ## tt-dlp
